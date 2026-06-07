@@ -35,8 +35,8 @@ export default function AddMovie() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (title.length < 1 || title.length > 20) {
-      alert('Title must be between 1 and 20 characters');
+    if (title.length < 1 || title.length > 50) {
+      alert('Title must be between 1 and 50 characters');
       return;
     }
     if (genre.length < 1) {
@@ -110,9 +110,11 @@ export default function AddMovie() {
         <img src={poster} alt="poster preview" className="w-24 rounded-lg border border-white/10" />
       )}
 
-      <button type="button" onClick={handleGenerate} className="w-full border border-yellow-400/60 text-yellow-400 hover:bg-yellow-400 hover:text-black font-semibold py-2.5 rounded-lg transition">
-        ✨ Generate description with AI
-      </button>
+      {!poster && (
+        <button type="button" onClick={handleGenerate} className="w-full border border-yellow-400/60 text-yellow-400 hover:bg-yellow-400 hover:text-black font-semibold py-2.5 rounded-lg transition">
+          ✨ Generate description with AI
+        </button>
+      )}
       <button type="submit" className="w-full bg-yellow-400 text-black font-bold py-2.5 rounded-lg hover:bg-yellow-300 transition">
         Add Movie
       </button>
