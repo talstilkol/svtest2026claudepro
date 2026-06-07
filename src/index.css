@@ -12,3 +12,11 @@ body {
   margin: 0;
   background: #121212;
 }
+
+/* טקסט בשדות תמיד שמאל-לימין (אנגלית) */
+input,
+textarea,
+select {
+  direction: ltr;
+  text-align: left;
+}
