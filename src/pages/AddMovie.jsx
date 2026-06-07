@@ -5,6 +5,7 @@ import { addMovie, generateDescription, suggestMovies } from '../api/moviesApi.j
 const GENRES = ['Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Drama', 'Fantasy', 'Horror', 'Romance', 'Sci-Fi'];
 
 export default function AddMovie() {
+  const [mode, setMode] = useState('pro'); // 'pro' = TMDb autocomplete · 'basic' = ידני + AI לתיאור
   const [title, setTitle] = useState('');
   const [genre, setGenre] = useState('');
   const [description, setDescription] = useState('');
@@ -13,15 +14,16 @@ export default function AddMovie() {
   const [suggestions, setSuggestions] = useState([]);
   const skipNext = useRef(false);
 
-  // סוכן ההשלמה: כשמקלידים כותרת — שולף הצעות סרטים אמיתיים מ-TMDb (עם debounce)
+  // סוכן ההשלמה — רק במצב Pro
   useEffect(() => {
+    if (mode !== 'pro') { setSuggestions([]); return; }
     if (skipNext.current) { skipNext.current = false; return; }
     if (title.trim().length < 2) { setSuggestions([]); return; }
     const t = setTimeout(() => {
       suggestMovies(title).then((res) => setSuggestions(res.data)).catch(() => setSuggestions([]));
     }, 350);
     return () => clearTimeout(t);
-  }, [title]);
+  }, [title, mode]);
 
   const pickSuggestion = (s) => {
     skipNext.current = true;
@@ -31,6 +33,13 @@ export default function AddMovie() {
     setYear(s.year);
     setPoster(s.poster);
     setSuggestions([]);
+  };
+
+  const switchMode = (m) => {
+    setMode(m);
+    setSuggestions([]);
+    setPoster('');
+    if (m === 'basic') setYear(null);
   };
 
   const handleSubmit = async (e) => {
@@ -43,7 +52,7 @@ export default function AddMovie() {
       alert('Genre is required');
       return;
     }
-    if (!year || year < 1888 || year > 2030) {
+    if (mode === 'pro' && (!year || year < 1888 || year > 2030)) {
       alert('Year must be a valid year (1888–2030)');
       return;
     }
@@ -51,7 +60,7 @@ export default function AddMovie() {
       alert('Description must be up to 1000 characters');
       return;
     }
-    await addMovie({ title, genre, description, year, poster });
+    await addMovie({ title, genre, description, year: mode === 'pro' ? year : undefined, poster: mode === 'pro' ? poster : '' });
     setTitle(''); setGenre(''); setDescription(''); setYear(null); setPoster('');
     alert('Movie added!');
   };
@@ -63,6 +72,10 @@ export default function AddMovie() {
     }
     try {
       const res = await generateDescription(title, genre);
+      if (!res.data.description) {
+        alert('AI returned no description.');
+        return;
+      }
       setDescription(res.data.description);
     } catch {
       alert('AI generation failed (AI Gateway may need billing enabled).');
@@ -71,13 +84,26 @@ export default function AddMovie() {
 
   const inputClass =
     'w-full bg-[#1f1f1f] border border-white/10 rounded-lg px-4 py-3 text-gray-100 placeholder-gray-500 focus:outline-none focus:border-yellow-400';
+  const tab = (m, label) =>
+    `flex-1 py-2 rounded-md text-sm font-semibold transition ${mode === m ? 'bg-yellow-400 text-black' : 'bg-white/5 text-gray-300 hover:bg-white/10'}`;
 
   return (
     <form onSubmit={handleSubmit} className="max-w-md mx-auto p-6 space-y-3">
-      <h1 className="text-2xl font-bold mb-2">Add Movie</h1>
+      <h1 className="text-2xl font-bold mb-1">Add Movie</h1>
+
+      {/* בורר מצב */}
+      <div className="flex gap-2 bg-[#1a1a1a] p-1 rounded-lg">
+        <button type="button" onClick={() => switchMode('pro')} className={tab('pro')}>Pro · TMDb suggestions</button>
+        <button type="button" onClick={() => switchMode('basic')} className={tab('basic')}>Basic · AI description</button>
+      </div>
 
       <div className="relative">
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title — start typing for suggestions" className={inputClass} />
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder={mode === 'pro' ? 'Title — start typing for suggestions' : 'Title'}
+          className={inputClass}
+        />
         {suggestions.length > 0 && (
           <ul className="absolute z-20 left-0 right-0 mt-1 bg-[#1a1a1a] border border-white/10 rounded-lg overflow-hidden shadow-xl">
             {suggestions.map((s, i) => (
@@ -100,21 +126,24 @@ export default function AddMovie() {
         {GENRES.map((gg) => <option key={gg} value={gg} />)}
       </datalist>
 
-      <input
-        type="number"
-        value={year ?? ''}
-        onChange={(e) => setYear(e.target.value ? Number(e.target.value) : null)}
-        placeholder="Year"
-        className={inputClass}
-      />
+      {mode === 'pro' && (
+        <input
+          type="number"
+          value={year ?? ''}
+          onChange={(e) => setYear(e.target.value ? Number(e.target.value) : null)}
+          placeholder="Year"
+          className={inputClass}
+        />
+      )}
 
       <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" rows={3} className={inputClass} />
 
-      {poster && (
+      {mode === 'pro' && poster && (
         <img src={poster} alt="poster preview" className="w-24 rounded-lg border border-white/10" />
       )}
 
-      {!poster && (
+      {/* כפתור AI: תמיד ב-Basic; ב-Pro רק כשלא מולא אוטומטית */}
+      {(mode === 'basic' || !poster) && (
         <button type="button" onClick={handleGenerate} className="w-full border border-yellow-400/60 text-yellow-400 hover:bg-yellow-400 hover:text-black font-semibold py-2.5 rounded-lg transition">
           ✨ Generate description with AI
         </button>
