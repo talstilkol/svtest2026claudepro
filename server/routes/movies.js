@@ -137,9 +137,13 @@ router.post('/generate', async (req, res) => {
 
 // GET /:id — סרט בודד (חייב להיות אחרי כל ה-GET הליטרליים)
 router.get('/:id', async (req, res) => {
-  const movie = await Movie.findById(req.params.id);
-  if (!movie) return res.status(404).json({ error: 'not found' });
-  res.json(movie);
+  try {
+    const movie = await Movie.findById(req.params.id);
+    if (!movie) return res.status(404).json({ error: 'not found' });
+    res.json(movie);
+  } catch (err) {
+    res.status(400).json({ error: 'invalid id' });
+  }
 });
 
 export default router;

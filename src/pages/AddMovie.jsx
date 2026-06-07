@@ -47,8 +47,8 @@ export default function AddMovie() {
       alert('Year must be a valid year (1888–2030)');
       return;
     }
-    if (description.length > 200) {
-      alert('Description must be up to 200 characters');
+    if (description.length > 1000) {
+      alert('Description must be up to 1000 characters');
       return;
     }
     await addMovie({ title, genre, description, year, poster });
