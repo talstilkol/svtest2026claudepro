@@ -11,3 +11,6 @@ export const generateDescription = (title, genre) =>
   axios.post(`${API}/api/movies/generate`, { title, genre });
 export const suggestMovies = (query) =>
   axios.get(`${API}/api/movies/suggest?query=${encodeURIComponent(query)}`);
+export const getMovie = (id) => axios.get(`${API}/api/movies/${id}`);
+export const getTmdbDetails = (title, year) =>
+  axios.get(`${API}/api/movies/tmdb?title=${encodeURIComponent(title)}&year=${year || ''}`);

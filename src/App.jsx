@@ -2,6 +2,7 @@ import { Routes, Route, NavLink } from 'react-router-dom';
 import AllMovies from './pages/AllMovies.jsx';
 import AddMovie from './pages/AddMovie.jsx';
 import SearchMovies from './pages/SearchMovies.jsx';
+import MovieDetail from './pages/MovieDetail.jsx';
 
 const linkClass = ({ isActive }) =>
   `px-3 py-1.5 rounded-md text-sm font-semibold transition ${
@@ -25,6 +26,7 @@ export default function App() {
         <Route path="/all-movies" element={<AllMovies />} />
         <Route path="/add-movie" element={<AddMovie />} />
         <Route path="/search-movies" element={<SearchMovies />} />
+        <Route path="/movie/:id" element={<MovieDetail />} />
         <Route path="*" element={<AllMovies />} />
       </Routes>
     </div>

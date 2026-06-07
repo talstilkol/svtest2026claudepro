@@ -1,4 +1,6 @@
 // כרטיס סרט בסגנון IMDb. מציג פוסטר אמיתי אם קיים, אחרת גרדיאנט עם אות ראשונה.
+import { Link } from 'react-router-dom';
+
 const gradients = [
   'from-rose-500 to-orange-400',
   'from-indigo-500 to-purple-500',
@@ -14,7 +16,7 @@ export default function MovieCard({ movie, onDelete }) {
 
   return (
     <div className="bg-[#1f1f1f] rounded-xl overflow-hidden border border-white/5 hover:border-yellow-400/40 transition shadow-lg flex flex-col">
-      <div className="relative h-56">
+      <Link to={`/movie/${movie._id}`} className="relative h-56 block">
         {movie.poster ? (
           <img src={movie.poster} alt={movie.title} className="h-full w-full object-cover" />
         ) : (
@@ -25,12 +27,12 @@ export default function MovieCard({ movie, onDelete }) {
         <span className="absolute top-2 right-2 bg-black/70 text-yellow-400 text-xs font-bold px-2 py-0.5 rounded">
           ★ {movie.genre}
         </span>
-      </div>
+      </Link>
       <div className="p-4 flex flex-col flex-1">
-        <h2 className="font-bold text-base leading-tight line-clamp-1">
+        <Link to={`/movie/${movie._id}`} className="font-bold text-base leading-tight line-clamp-1 hover:text-yellow-400">
           {movie.title}{' '}
           {movie.year && <span className="text-gray-500 font-normal">({movie.year})</span>}
-        </h2>
+        </Link>
         <p className="mt-1 text-sm text-gray-400 line-clamp-2 flex-1">{movie.description}</p>
         <a
           href={imdbUrl}
