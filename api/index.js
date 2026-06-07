@@ -37,4 +37,10 @@ app.get('/api/health', (_req, res) => {
   res.json({ ok: true, mongo: mongoose.connection.readyState === 1 ? 'connected' : 'connecting' });
 });
 
+// error handler — תופס שגיאות אסינכרוניות מכל הראוטים
+app.use((err, _req, res, _next) => {
+  if (err?.name === 'CastError') return res.status(400).json({ error: 'invalid id' });
+  res.status(500).json({ error: 'Server error' });
+});
+
 export default app;

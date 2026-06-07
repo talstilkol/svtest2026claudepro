@@ -61,8 +61,12 @@ export default function AddMovie() {
       alert('Enter title and genre first');
       return;
     }
-    const res = await generateDescription(title, genre);
-    setDescription(res.data.description);
+    try {
+      const res = await generateDescription(title, genre);
+      setDescription(res.data.description);
+    } catch {
+      alert('AI generation failed (AI Gateway may need billing enabled).');
+    }
   };
 
   const inputClass =
